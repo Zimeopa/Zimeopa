@@ -1,200 +1,257 @@
-<!DOCTYPE html>
-<html lang="vi">
+<!DOCTYPE html><html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>Script Web</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body{margin:0;font-family:Arial;background:#020617;color:#e5e7eb}
-header{padding:15px;border-bottom:1px solid #1e293b;display:flex;justify-content:space-between}
-a{color:#38bdf8;text-decoration:none;margin-left:15px}
-.container{max-width:1100px;margin:auto;padding:20px}
-.card{border:1px solid #1e293b;border-radius:10px;padding:15px;margin-bottom:15px}
-input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:none}
-button{padding:8px 16px;border:none;border-radius:6px;font-weight:bold;cursor:pointer}
-.btn{background:#38bdf8;color:#000}
-.green{background:#22c55e;color:#000}
-.red{background:#ef4444;color:#fff}
-.gray{background:#334155;color:#fff}
-.hide{display:none}
-img{max-width:100%;border-radius:8px;margin-top:8px}
-small{color:#94a3b8}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apex Script Hub</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      min-height: 100vh;
+    }
+    header {
+      padding: 20px;
+      text-align: center;
+      background: rgba(0,0,0,0.4);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+    header p {
+      margin-top: 8px;
+      color: #ccc;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 35px rgba(0,0,0,0.6);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+    .card p {
+      font-size: 14px;
+      color: #ddd;
+      line-height: 1.5;
+    }
+    .card button {
+      margin-top: 12px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 14px;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: white;
+    }
+    .card button:hover {
+      opacity: 0.9;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 13px;
+      color: #aaa;
+    }
+  </style>
 </head>
-
 <body>
+  <header>
+    <h1>Apex Script Hub</h1>
+    <p>Website sưu tầm & chia sẻ script Roblox</p>
+    <nav style="margin-top:12px;">
+      <button onclick="openKey()">Nhập Key</button>
+      <button onclick="toggleAdmin()">Admin Panel</button>
+    </nav>
+  </header>  <div class="container" id="scriptList">
+    <!-- SCRIPT SẼ HIỆN SAU KHI OWNER DUYỆT -->
+    <div class="card" data-id="1">
+      <h2>Script Blox Fruits</h2>
+      <p class="scriptContent">Script hỗ trợ farm, auto skill, teleport và nhiều tính năng khác.</p>
+      <p>❤️ <span class="likes">0</span> lượt thích</p>
+      <button onclick="likeScript(1)">Like</button>
+      <button onclick="saveScript(1)">📃 Lưu Script</button>
+      <button onclick="deleteScript(1)" class="adminOnly">Xoá Script</button>
+    </div><div class="card" data-id="2">
+  <h2>Script King Legacy</h2>
+  <p class="scriptContent">Tự động đánh quái, farm level và mở skill nhanh chóng.</p>
+  <p>❤️ <span class="likes">0</span> lượt thích</p>
+  <button onclick="likeScript(2)">Like</button>
+  <button onclick="saveScript(2)">📃 Lưu Script</button>
+  <button onclick="deleteScript(2)" class="adminOnly">Xoá Script</button>
+</div>
 
-<header>
-  <b>Script Web</b>
-  <div id="menu">
-    <a href="#scripts">Scripts</a>
-    <a href="#create">Tạo Script</a>
+  </div><div class="card">
+  <h2>Script King Legacy</h2>
+  <p>Tự động đánh quái, farm level và mở skill nhanh chóng.</p>
+  <button onclick="alert('Đang cập nhật script!')">Xem Script</button>
+</div>
+
+<div class="card">
+  <h2>Script Tổng Hợp</h2>
+  <p>Nhiều script cho các game Roblox phổ biến.</p>
+  <button onclick="alert('Đang cập nhật script!')">Xem Script</button>
+</div>
+
+  </div>  <footer>
+    © 2026 Apex Script Hub | Owner: Bạn
+  </footer>  <!-- KEY MODAL -->  <div id="keyBox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;">
+    <div style="background:#111;padding:20px;border-radius:12px;width:300px;">
+      <h3>Đăng nhập</h3>
+      <input id="usernameInput" placeholder="Tên người chơi (User)" style="width:100%;padding:8px;border-radius:8px;border:none;margin-bottom:8px;" />
+      <input id="keyInput" placeholder="Owner Key (chỉ Owner)" style="width:100%;padding:8px;border-radius:8px;border:none;" />
+      <button style="margin-top:10px;width:100%;" onclick="login()">Xác nhận</button>
+    </div>
   </div>
-</header>
+  </div>  <!-- ADMIN PANEL (OWNER ONLY) -->  <div id="admin" style="display:none;padding:20px;max-width:1000px;margin:20px auto;background:rgba(255,255,255,.08);border-radius:16px;">
+    <h2>Admin Panel (Owner)</h2>
+    <h3>➕ Đăng Script Roblox</h3>
+    <input id="newTitle" placeholder="Tên Script" style="width:100%;padding:8px;border-radius:8px;border:none;margin-bottom:6px;" />
+    <textarea id="newDesc" placeholder="Mô tả script" style="width:100%;padding:8px;border-radius:8px;border:none;margin-bottom:6px;"></textarea>
+    <textarea id="newCode" placeholder="Script Roblox (Lua)" style="width:100%;padding:8px;border-radius:8px;border:none;"></textarea>
+    <button onclick="submitScript()">Gửi kiểm duyệt</button><h3 style="margin-top:20px;">📋 Script chờ duyệt</h3>
+<div id="pendingList"></div>
 
-<div class="container">
-
-<!-- LOGIN -->
-<div class="card" id="loginBox">
-  <h3>Login</h3>
-  <input id="nameInput" placeholder="Tên Roblox (Player)">
-  <input id="keyInput" placeholder="Key">
-  <button class="btn" onclick="login()">Login</button>
-</div>
-
-<!-- CREATE -->
-<div class="card hide" id="create">
-  <h3>Tạo Script</h3>
-  <input id="sName" placeholder="Tên script">
-  <input id="sImg" placeholder="Link ảnh (tùy chọn)">
-  <textarea id="sDesc" placeholder="Mô tả"></textarea>
-  <textarea id="sCode" placeholder="Nội dung script"></textarea>
-  <button class="btn" onclick="createScript()">Gửi duyệt</button>
-</div>
-
-<!-- PUBLIC -->
-<div class="card hide" id="scripts">
-  <h3>Scripts</h3>
-  <input id="search" placeholder="Tìm script..." onkeyup="renderPublic()">
-  <div id="publicList"></div>
-</div>
-
-<!-- OWNER -->
-<div class="card hide" id="ownerPanel">
-  <h3>Duyệt Script (Owner)</h3>
-  <div id="reviewList"></div>
-</div>
-
-</div>
-
-<script>
+  </div>  <script>
 /* ===== CONFIG ===== */
-const OWNER_KEY = "OWNER-SSS-PLUS-999";
-let user = null;
-let isOwner = false;
+const OWNER_KEY = "OWNER-123";
 
-/* ===== DATA ===== */
-let pending = JSON.parse(localStorage.getItem("pending")) || [];
-let approved = JSON.parse(localStorage.getItem("approved")) || [];
+/* ===== LOAD ===== */
+window.onload = () => {
+  const acc = JSON.parse(localStorage.getItem('account'));
+  if(acc) enterAccount(acc);
+  loadLikes();
+  loadApproved();
+  loadPending();
+};
 
 /* ===== LOGIN ===== */
+function openKey(){ document.getElementById('keyBox').style.display='flex'; }
+
 function login(){
-  const key = keyInput.value.trim();
-  const name = nameInput.value.trim();
+  const username = document.getElementById('usernameInput').value.trim();
+  const key = document.getElementById('keyInput').value.trim();
 
-  if(key === OWNER_KEY){
-    if(localStorage.getItem("ownerUsed")) return alert("Owner key đã dùng");
-    localStorage.setItem("ownerUsed","1");
-    isOwner = true;
-    user = "OWNER";
-  }else{
-    if(!name) return alert("Nhập tên Roblox");
-    user = name;
+  if(key === OWNER_KEY && !localStorage.getItem('usedOwnerKey')){
+    localStorage.setItem('usedOwnerKey','true');
+    const acc = { role:'owner' };
+    localStorage.setItem('account', JSON.stringify(acc));
+    alert('Owner đăng nhập thành công');
+    enterAccount(acc);
   }
-
-  loginBox.classList.add("hide");
-  create.classList.remove("hide");
-  scripts.classList.remove("hide");
-
-  if(isOwner){
-    ownerPanel.classList.remove("hide");
-    menu.innerHTML += `<a href="#ownerPanel">Cài đặt</a>`;
+  else if(username){
+    const acc = { role:'user', name: username };
+    localStorage.setItem('account', JSON.stringify(acc));
+    alert('Chào mừng ' + username);
+    enterAccount(acc);
   }
+  else alert('Nhập tên hoặc key');
 
-  renderPublic();
-  renderReview();
+  document.getElementById('keyBox').style.display='none';
 }
 
-/* ===== CREATE SCRIPT ===== */
-function createScript(){
-  if(!sName.value || !sCode.value) return alert("Thiếu dữ liệu");
-
-  pending.push({
-    id: Date.now(),
-    name: sName.value,
-    img: sImg.value,
-    desc: sDesc.value,
-    code: sCode.value,
-    author: user,
-    likes: 0
-  });
-
-  save();
-  sName.value=sImg.value=sDesc.value=sCode.value="";
-  alert("Đã gửi duyệt");
+function enterAccount(acc){
+  if(acc.role === 'owner'){
+    document.getElementById('admin').style.display='block';
+  }
 }
 
-/* ===== OWNER REVIEW ===== */
-function renderReview(){
-  if(!isOwner) return;
-  reviewList.innerHTML="";
-  pending.forEach((s,i)=>{
-    reviewList.innerHTML+=`
-      <div class="card">
-        <b>${s.name}</b> <small>by ${s.author}</small>
-        <p>${s.desc}</p>
-        <button class="green" onclick="approve(${i})">Duyệt</button>
-        <button class="red" onclick="reject(${i})">Từ chối</button>
-      </div>`;
+/* ===== SCRIPT FLOW ===== */
+function submitScript(){
+  const t = newTitle.value.trim();
+  const d = newDesc.value.trim();
+  const c = newCode.value.trim();
+  if(!t||!c) return alert('Thiếu thông tin');
+
+  const list = JSON.parse(localStorage.getItem('pending')||'[]');
+  list.push({id:Date.now(),title:t,desc:d,code:c});
+  localStorage.setItem('pending',JSON.stringify(list));
+  alert('Đã gửi script để kiểm duyệt');
+  newTitle.value=newDesc.value=newCode.value='';
+  loadPending();
+}
+
+function loadPending(){
+  const wrap = document.getElementById('pendingList');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  const list = JSON.parse(localStorage.getItem('pending')||'[]');
+  list.forEach(s=>{
+    const div=document.createElement('div');
+    div.innerHTML=`<b>${s.title}</b><br>${s.desc}<br>
+    <button onclick="approve(${s.id})">✔ Duyệt</button>
+    <button onclick="reject(${s.id})">✖ Xoá</button>`;
+    wrap.appendChild(div);
   });
 }
-function approve(i){
-  approved.push(pending[i]);
-  pending.splice(i,1);
-  save();
-}
-function reject(i){
-  pending.splice(i,1);
-  save();
-}
 
-/* ===== PUBLIC ===== */
-function renderPublic(){
-  publicList.innerHTML="";
-  const q = search.value.toLowerCase();
+function approve(id){
+  let p = JSON.parse(localStorage.getItem('pending')||'[]');
+  const s = p.find(x=>x.id===id);
+  p = p.filter(x=>x.id!==id);
+  localStorage.setItem('pending',JSON.stringify(p));
 
-  approved
-    .filter(s=>s.name.toLowerCase().includes(q))
-    .forEach((s,i)=>{
-      publicList.innerHTML+=`
-        <div class="card">
-          <h4>${s.name}</h4>
-          <small>by ${s.author}</small>
-          ${s.img?`<img src="${s.img}">`:""}
-          <p>${s.desc}</p>
-
-          <button class="gray" onclick="like(${i})">👍 ${s.likes}</button>
-          <button class="btn" onclick="copyCode(${i})">📋 Copy</button>
-          ${isOwner ? `<button class="red" onclick="deleteScript(${i})">🗑️ Xoá</button>` : ``}
-        </div>`;
-    });
+  const a = JSON.parse(localStorage.getItem('approved')||'[]');
+  a.push({...s,likes:0});
+  localStorage.setItem('approved',JSON.stringify(a));
+  loadPending(); loadApproved();
 }
 
-function like(i){
-  approved[i].likes++;
-  save();
-}
-function copyCode(i){
-  navigator.clipboard.writeText(approved[i].code);
-  alert("Đã copy script");
+function reject(id){
+  let p = JSON.parse(localStorage.getItem('pending')||'[]');
+  p = p.filter(x=>x.id!==id);
+  localStorage.setItem('pending',JSON.stringify(p));
+  loadPending();
 }
 
-/* ===== OWNER DELETE ===== */
-function deleteScript(i){
-  if(!isOwner) return;
-  if(!confirm("Owner xoá script này?")) return;
-  approved.splice(i,1);
-  save();
+function loadApproved(){
+  const box=document.getElementById('scriptList');
+  box.innerHTML='';
+  const list=JSON.parse(localStorage.getItem('approved')||'[]');
+  list.forEach(s=>{
+    const card=document.createElement('div');
+    card.className='card';
+    card.dataset.id=s.id;
+    card.innerHTML=`<h2>${s.title}</h2>
+    <p>${s.desc}</p>
+    <p>❤️ <span class="likes">${s.likes}</span></p>
+    <button onclick="likeScript(${s.id})">Like</button>
+    <button onclick="saveScript(${s.id})">📃 Lưu Script</button>`;
+    box.appendChild(card);
+  });
 }
 
-/* ===== SAVE ===== */
-function save(){
-  localStorage.setItem("pending",JSON.stringify(pending));
-  localStorage.setItem("approved",JSON.stringify(approved));
-  renderPublic();
-  renderReview();
+/* ===== LIKE & SAVE ===== */
+function likeScript(id){
+  if(localStorage.getItem('liked_'+id)) return alert('Đã like');
+  const list=JSON.parse(localStorage.getItem('approved')||'[]');
+  const s=list.find(x=>x.id===id);
+  s.likes++; localStorage.setItem('approved',JSON.stringify(list));
+  localStorage.setItem('liked_'+id,'1'); loadApproved();
 }
-</script>
 
-</body>
+function saveScript(id){
+  if(localStorage.getItem('saved_'+id)) return alert('Đã lưu');
+  localStorage.setItem('saved_'+id,'1'); alert('📃 Đã lưu script Roblox');
+}
+</script></body>
 </html>
