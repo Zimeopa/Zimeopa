@@ -13,7 +13,7 @@ a{color:#38bdf8;text-decoration:none;margin-left:15px}
 input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:none}
 button{padding:8px 16px;border:none;border-radius:6px;font-weight:bold;cursor:pointer}
 .btn{background:#38bdf8;color:#000}
-.green{background:#22c55e}
+.green{background:#22c55e;color:#000}
 .red{background:#ef4444;color:#fff}
 .gray{background:#334155;color:#fff}
 .hide{display:none}
@@ -74,8 +74,8 @@ let user = null;
 let isOwner = false;
 
 /* ===== DATA ===== */
-let pending = JSON.parse(localStorage.getItem("pending"))||[];
-let approved = JSON.parse(localStorage.getItem("approved"))||[];
+let pending = JSON.parse(localStorage.getItem("pending")) || [];
+let approved = JSON.parse(localStorage.getItem("approved")) || [];
 
 /* ===== LOGIN ===== */
 function login(){
@@ -110,14 +110,15 @@ function createScript(){
   if(!sName.value || !sCode.value) return alert("Thiếu dữ liệu");
 
   pending.push({
-    id:Date.now(),
-    name:sName.value,
-    img:sImg.value,
-    desc:sDesc.value,
-    code:sCode.value,
-    author:user,
-    likes:0
+    id: Date.now(),
+    name: sName.value,
+    img: sImg.value,
+    desc: sDesc.value,
+    code: sCode.value,
+    author: user,
+    likes: 0
   });
+
   save();
   sName.value=sImg.value=sDesc.value=sCode.value="";
   alert("Đã gửi duyệt");
@@ -151,19 +152,24 @@ function reject(i){
 function renderPublic(){
   publicList.innerHTML="";
   const q = search.value.toLowerCase();
-  approved.filter(s=>s.name.toLowerCase().includes(q))
-  .forEach((s,i)=>{
-    publicList.innerHTML+=`
-      <div class="card">
-        <h4>${s.name}</h4>
-        <small>by ${s.author}</small>
-        ${s.img?`<img src="${s.img}">`:""}
-        <p>${s.desc}</p>
-        <button class="gray" onclick="like(${i})">👍 ${s.likes}</button>
-        <button class="btn" onclick="copyCode(${i})">Copy</button>
-      </div>`;
-  });
+
+  approved
+    .filter(s=>s.name.toLowerCase().includes(q))
+    .forEach((s,i)=>{
+      publicList.innerHTML+=`
+        <div class="card">
+          <h4>${s.name}</h4>
+          <small>by ${s.author}</small>
+          ${s.img?`<img src="${s.img}">`:""}
+          <p>${s.desc}</p>
+
+          <button class="gray" onclick="like(${i})">👍 ${s.likes}</button>
+          <button class="btn" onclick="copyCode(${i})">📋 Copy</button>
+          ${isOwner ? `<button class="red" onclick="deleteScript(${i})">🗑️ Xoá</button>` : ``}
+        </div>`;
+    });
 }
+
 function like(i){
   approved[i].likes++;
   save();
@@ -171,6 +177,14 @@ function like(i){
 function copyCode(i){
   navigator.clipboard.writeText(approved[i].code);
   alert("Đã copy script");
+}
+
+/* ===== OWNER DELETE ===== */
+function deleteScript(i){
+  if(!isOwner) return;
+  if(!confirm("Owner xoá script này?")) return;
+  approved.splice(i,1);
+  save();
 }
 
 /* ===== SAVE ===== */
