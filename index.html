@@ -2,205 +2,184 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Roblox Script Manager</title>
-
+<title>Script Web</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body {
-  background:#0b0b0b;
-  color:white;
-  font-family:Arial;
-  margin:0;
-  user-select:none;
-}
-header {
-  background:#111;
-  padding:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.box {
-  background:#1c1c1c;
-  margin:15px auto;
-  padding:15px;
-  width:360px;
-  border-radius:10px;
-}
-input, textarea {
-  width:95%;
-  padding:7px;
-  margin:5px;
-}
-button {
-  background:#ff0033;
-  color:white;
-  border:none;
-  padding:7px 12px;
-  border-radius:6px;
-  margin:3px;
-}
-.hidden { display:none; }
-.scriptBox {
-  background:black;
-  padding:10px;
-  margin-top:10px;
-}
-.settings {
-  position:fixed;
-  top:50px;
-  right:10px;
-  background:#1a1a1a;
-  padding:10px;
-  width:250px;
-  border-radius:10px;
-}
+body{margin:0;font-family:Arial;background:#020617;color:#e5e7eb}
+header{padding:15px;border-bottom:1px solid #1e293b;display:flex;justify-content:space-between}
+a{color:#38bdf8;text-decoration:none;margin-left:15px}
+.container{max-width:1100px;margin:auto;padding:20px}
+.card{border:1px solid #1e293b;border-radius:10px;padding:15px;margin-bottom:15px}
+input,textarea{width:100%;padding:10px;margin:5px 0;border-radius:6px;border:none}
+button{padding:8px 16px;border:none;border-radius:6px;font-weight:bold;cursor:pointer}
+.btn{background:#38bdf8;color:#000}
+.green{background:#22c55e}
+.red{background:#ef4444;color:#fff}
+.gray{background:#334155;color:#fff}
+.hide{display:none}
+img{max-width:100%;border-radius:8px;margin-top:8px}
+small{color:#94a3b8}
 </style>
 </head>
 
 <body>
 
 <header>
-  <b id="gameTitle">🎮 Roblox Script Hub</b>
-  <button id="settingBtn" class="hidden" onclick="toggleSettings()">⚙️</button>
+  <b>Script Web</b>
+  <div id="menu">
+    <a href="#scripts">Scripts</a>
+    <a href="#create">Tạo Script</a>
+  </div>
 </header>
 
+<div class="container">
+
 <!-- LOGIN -->
-<div class="box" id="loginBox">
-<h3>Đăng nhập</h3>
-<input id="username" placeholder="Tên Roblox chính xác">
-<input id="ownerKey" placeholder="Owner Key (nếu có)">
-<button onclick="login()">Đăng nhập</button>
+<div class="card" id="loginBox">
+  <h3>Login</h3>
+  <input id="nameInput" placeholder="Tên Roblox (Player)">
+  <input id="keyInput" placeholder="Key">
+  <button class="btn" onclick="login()">Login</button>
 </div>
 
-<!-- PLAYER VIEW -->
-<div class="box hidden" id="playerView">
-<h3>📜 Script Roblox</h3>
-<input id="searchScript" placeholder="Tìm script">
-<button onclick="showScripts()">Tìm</button>
-<div id="scriptList"></div>
+<!-- CREATE -->
+<div class="card hide" id="create">
+  <h3>Tạo Script</h3>
+  <input id="sName" placeholder="Tên script">
+  <input id="sImg" placeholder="Link ảnh (tùy chọn)">
+  <textarea id="sDesc" placeholder="Mô tả"></textarea>
+  <textarea id="sCode" placeholder="Nội dung script"></textarea>
+  <button class="btn" onclick="createScript()">Gửi duyệt</button>
 </div>
 
-<!-- SETTINGS -->
-<div class="settings hidden" id="settings">
-<h4>⚙️ Cài đặt</h4>
+<!-- PUBLIC -->
+<div class="card hide" id="scripts">
+  <h3>Scripts</h3>
+  <input id="search" placeholder="Tìm script..." onkeyup="renderPublic()">
+  <div id="publicList"></div>
+</div>
 
-<input id="newGameName" placeholder="Tên game Roblox">
-<button onclick="setGame()">Lưu tên game</button>
+<!-- OWNER -->
+<div class="card hide" id="ownerPanel">
+  <h3>Duyệt Script (Owner)</h3>
+  <div id="reviewList"></div>
+</div>
 
-<hr>
-
-<input id="scriptName" placeholder="Tên script">
-<textarea id="scriptCode" placeholder="Script Roblox"></textarea>
-<button onclick="addOrUpdateScript()">➕ / 🔄 Script</button>
-
-<button onclick="notifyAll()">📢 Thông báo update</button>
 </div>
 
 <script>
-// ===== LOAD DATA =====
-let data = JSON.parse(localStorage.getItem("hubData")) || {
-  ownerKey: "OWNER-KEY-ONE-TIME",
-  users: {},
-  scripts: [],
-  gameName: "Roblox Script Hub"
-};
+/* ===== CONFIG ===== */
+const OWNER_KEY = "OWNER-SSS-PLUS-999";
+let user = null;
+let isOwner = false;
 
-let currentUser = null;
+/* ===== DATA ===== */
+let pending = JSON.parse(localStorage.getItem("pending"))||[];
+let approved = JSON.parse(localStorage.getItem("approved"))||[];
 
-// ===== SAVE =====
-function save() {
-  localStorage.setItem("hubData", JSON.stringify(data));
-}
+/* ===== LOGIN ===== */
+function login(){
+  const key = keyInput.value.trim();
+  const name = nameInput.value.trim();
 
-// ===== LOGIN =====
-function login() {
-  let name = username.value.trim();
-  let key = ownerKey.value.trim();
-  if (!name) return alert("Nhập tên Roblox!");
-
-  let rank = "Player";
-
-  if (key && key === data.ownerKey) {
-    rank = "Owner";
-    data.ownerKey = null;
-    alert("Owner đăng nhập!");
+  if(key === OWNER_KEY){
+    if(localStorage.getItem("ownerUsed")) return alert("Owner key đã dùng");
+    localStorage.setItem("ownerUsed","1");
+    isOwner = true;
+    user = "OWNER";
+  }else{
+    if(!name) return alert("Nhập tên Roblox");
+    user = name;
   }
 
-  data.users[name] = rank;
-  currentUser = {name, rank};
-  save();
+  loginBox.classList.add("hide");
+  create.classList.remove("hide");
+  scripts.classList.remove("hide");
 
-  loginBox.classList.add("hidden");
-  playerView.classList.remove("hidden");
-
-  gameTitle.textContent = "🎮 " + data.gameName;
-
-  if (rank !== "Player") {
-    settingBtn.classList.remove("hidden");
+  if(isOwner){
+    ownerPanel.classList.remove("hide");
+    menu.innerHTML += `<a href="#ownerPanel">Cài đặt</a>`;
   }
 
-  showScripts();
+  renderPublic();
+  renderReview();
 }
 
-// ===== SETTINGS =====
-function toggleSettings() {
-  settings.classList.toggle("hidden");
+/* ===== CREATE SCRIPT ===== */
+function createScript(){
+  if(!sName.value || !sCode.value) return alert("Thiếu dữ liệu");
+
+  pending.push({
+    id:Date.now(),
+    name:sName.value,
+    img:sImg.value,
+    desc:sDesc.value,
+    code:sCode.value,
+    author:user,
+    likes:0
+  });
+  save();
+  sName.value=sImg.value=sDesc.value=sCode.value="";
+  alert("Đã gửi duyệt");
 }
 
-function setGame() {
-  data.gameName = newGameName.value;
-  gameTitle.textContent = "🎮 " + data.gameName;
+/* ===== OWNER REVIEW ===== */
+function renderReview(){
+  if(!isOwner) return;
+  reviewList.innerHTML="";
+  pending.forEach((s,i)=>{
+    reviewList.innerHTML+=`
+      <div class="card">
+        <b>${s.name}</b> <small>by ${s.author}</small>
+        <p>${s.desc}</p>
+        <button class="green" onclick="approve(${i})">Duyệt</button>
+        <button class="red" onclick="reject(${i})">Từ chối</button>
+      </div>`;
+  });
+}
+function approve(i){
+  approved.push(pending[i]);
+  pending.splice(i,1);
+  save();
+}
+function reject(i){
+  pending.splice(i,1);
   save();
 }
 
-// ===== SCRIPT =====
-function addOrUpdateScript() {
-  let name = scriptName.value;
-  let code = scriptCode.value;
-  if (!name || !code) return alert("Thiếu thông tin!");
-
-  let s = data.scripts.find(x => x.name === name);
-  if (s) s.code = code;
-  else data.scripts.push({name, code});
-
+/* ===== PUBLIC ===== */
+function renderPublic(){
+  publicList.innerHTML="";
+  const q = search.value.toLowerCase();
+  approved.filter(s=>s.name.toLowerCase().includes(q))
+  .forEach((s,i)=>{
+    publicList.innerHTML+=`
+      <div class="card">
+        <h4>${s.name}</h4>
+        <small>by ${s.author}</small>
+        ${s.img?`<img src="${s.img}">`:""}
+        <p>${s.desc}</p>
+        <button class="gray" onclick="like(${i})">👍 ${s.likes}</button>
+        <button class="btn" onclick="copyCode(${i})">Copy</button>
+      </div>`;
+  });
+}
+function like(i){
+  approved[i].likes++;
   save();
-  alert("Đã lưu script!");
-  showScripts();
+}
+function copyCode(i){
+  navigator.clipboard.writeText(approved[i].code);
+  alert("Đã copy script");
 }
 
-function showScripts() {
-  let key = searchScript.value.toLowerCase();
-  scriptList.innerHTML = "";
-
-  data.scripts
-    .filter(s => s.name.toLowerCase().includes(key))
-    .forEach(s => {
-      let div = document.createElement("div");
-      div.className = "scriptBox";
-      div.innerHTML = `
-        <b>${s.name}</b><br><br>
-        <button onclick="downloadScript('${s.name}')">📃 Lưu Script</button>
-      `;
-      scriptList.appendChild(div);
-    });
+/* ===== SAVE ===== */
+function save(){
+  localStorage.setItem("pending",JSON.stringify(pending));
+  localStorage.setItem("approved",JSON.stringify(approved));
+  renderPublic();
+  renderReview();
 }
-
-// ===== DOWNLOAD =====
-function downloadScript(name) {
-  let s = data.scripts.find(x => x.name === name);
-  let blob = new Blob([s.code], {type:"text/plain"});
-  let a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = name + ".txt";
-  a.click();
-}
-
-// ===== NOTIFY =====
-function notifyAll() {
-  alert("📢 Script vừa được UPDATE!");
-}
-
-save();
 </script>
 
 </body>
