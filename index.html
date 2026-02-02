@@ -2,212 +2,205 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Roblox Script Hub</title>
+<title>Roblox Script Manager</title>
 
 <style>
-body{
-  margin:0;
-  background:#0b0e1a;
-  color:#fff;
-  font-family:Arial
-}
-header{
-  background:#15193a;
-  padding:15px;
-  text-align:center
-}
-input,textarea,button{
-  width:100%;
-  margin:5px 0;
-  padding:10px;
-  border:none;
-  border-radius:8px
-}
-button{
-  background:#5865f2;
+body {
+  background:#0b0b0b;
   color:white;
-  cursor:pointer
+  font-family:Arial;
+  margin:0;
+  user-select:none;
 }
-.page{display:none;padding:15px}
-.card{
-  background:#15193a;
-  margin:10px 0;
+header {
+  background:#111;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.box {
+  background:#1c1c1c;
+  margin:15px auto;
   padding:15px;
-  border-radius:12px
+  width:360px;
+  border-radius:10px;
 }
-.actions button{
-  width:auto;
-  font-size:18px;
-  margin-right:5px
+input, textarea {
+  width:95%;
+  padding:7px;
+  margin:5px;
 }
-.saved{background:#22c55e}
+button {
+  background:#ff0033;
+  color:white;
+  border:none;
+  padding:7px 12px;
+  border-radius:6px;
+  margin:3px;
+}
+.hidden { display:none; }
+.scriptBox {
+  background:black;
+  padding:10px;
+  margin-top:10px;
+}
+.settings {
+  position:fixed;
+  top:50px;
+  right:10px;
+  background:#1a1a1a;
+  padding:10px;
+  width:250px;
+  border-radius:10px;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>🕹 ROBLOX SCRIPT HUB</h1>
-<div id="profile"></div>
+  <b id="gameTitle">🎮 Roblox Script Hub</b>
+  <button id="settingBtn" class="hidden" onclick="toggleSettings()">⚙️</button>
 </header>
 
 <!-- LOGIN -->
-<div id="login" class="page">
-<h2>🔐 Đăng nhập</h2>
-<input id="username" placeholder="Tên Roblox">
-<input id="key" placeholder="Key (Owner / Staff)">
+<div class="box" id="loginBox">
+<h3>Đăng nhập</h3>
+<input id="username" placeholder="Tên Roblox chính xác">
+<input id="ownerKey" placeholder="Owner Key (nếu có)">
 <button onclick="login()">Đăng nhập</button>
-<p id="msg"></p>
 </div>
 
-<!-- MAIN -->
-<div id="main" class="page">
-
-<input id="search" placeholder="🔍 Tìm script..." onkeyup="searchScript()">
-
-<div id="addScript">
-<h3>➕ Thêm Script</h3>
-<input id="title" placeholder="Tên script">
-<textarea id="code" placeholder="Code script"></textarea>
-<button onclick="addScript()">Thêm</button>
+<!-- PLAYER VIEW -->
+<div class="box hidden" id="playerView">
+<h3>📜 Script Roblox</h3>
+<input id="searchScript" placeholder="Tìm script">
+<button onclick="showScripts()">Tìm</button>
+<div id="scriptList"></div>
 </div>
 
-<button onclick="showAll()">🌍 Tất cả</button>
-<button onclick="showSaved()">📃 Script đã lưu</button>
+<!-- SETTINGS -->
+<div class="settings hidden" id="settings">
+<h4>⚙️ Cài đặt</h4>
 
-<div id="scripts"></div>
+<input id="newGameName" placeholder="Tên game Roblox">
+<button onclick="setGame()">Lưu tên game</button>
+
+<hr>
+
+<input id="scriptName" placeholder="Tên script">
+<textarea id="scriptCode" placeholder="Script Roblox"></textarea>
+<button onclick="addOrUpdateScript()">➕ / 🔄 Script</button>
+
+<button onclick="notifyAll()">📢 Thông báo update</button>
 </div>
 
 <script>
-// ====== CONFIG ======
-const OWNER_KEY = "OWNER-ONE-TIME-999"; // 👑 KEY 1 LẦN
-const MANAGER_KEY = "MANAGER-111";      // 🧠 KEY ANH
+// ===== LOAD DATA =====
+let data = JSON.parse(localStorage.getItem("hubData")) || {
+  ownerKey: "OWNER-KEY-ONE-TIME",
+  users: {},
+  scripts: [],
+  gameName: "Roblox Script Hub"
+};
 
-// ====== LOGIN ======
-function login(){
-  const name = username.value.trim();
-  const k = key.value.trim();
-  if(!name){msg.innerText="❌ Nhập tên";return;}
+let currentUser = null;
 
-  let rank="PLAYER";
-  let owner = localStorage.getItem("ownerName");
+// ===== SAVE =====
+function save() {
+  localStorage.setItem("hubData", JSON.stringify(data));
+}
 
-  if(!owner && k===OWNER_KEY){
-    localStorage.setItem("ownerName",name);
-    rank="OWNER";
-    alert("👑 Owner đã kích hoạt, key đã bị huỷ");
+// ===== LOGIN =====
+function login() {
+  let name = username.value.trim();
+  let key = ownerKey.value.trim();
+  if (!name) return alert("Nhập tên Roblox!");
+
+  let rank = "Player";
+
+  if (key && key === data.ownerKey) {
+    rank = "Owner";
+    data.ownerKey = null;
+    alert("Owner đăng nhập!");
   }
-  else if(owner && name===owner){
-    rank="OWNER";
+
+  data.users[name] = rank;
+  currentUser = {name, rank};
+  save();
+
+  loginBox.classList.add("hidden");
+  playerView.classList.remove("hidden");
+
+  gameTitle.textContent = "🎮 " + data.gameName;
+
+  if (rank !== "Player") {
+    settingBtn.classList.remove("hidden");
   }
-  else if(k===MANAGER_KEY){
-    rank="MANAGER";
-  }
-  else if(k.startsWith("ADMIN-")){
-    rank="ADMIN";
-  }
 
-  localStorage.setItem("user",JSON.stringify({name,rank}));
-  init();
+  showScripts();
 }
 
-// ====== INIT ======
-function init(){
-  const user = JSON.parse(localStorage.getItem("user"));
-  if(!user){loginPage();return;}
-
-  login.style.display="none";
-  main.style.display="block";
-  profile.innerText=`👤 ${user.name} | 🎖 ${user.rank}`;
-
-  if(user.rank==="PLAYER"){
-    addScript.style.display="none";
-  }
-  render();
+// ===== SETTINGS =====
+function toggleSettings() {
+  settings.classList.toggle("hidden");
 }
 
-function loginPage(){
-  login.style.display="block";
-  main.style.display="none";
+function setGame() {
+  data.gameName = newGameName.value;
+  gameTitle.textContent = "🎮 " + data.gameName;
+  save();
 }
 
-// ====== SCRIPT DATA ======
-let scripts = JSON.parse(localStorage.getItem("scripts"))||[];
+// ===== SCRIPT =====
+function addOrUpdateScript() {
+  let name = scriptName.value;
+  let code = scriptCode.value;
+  if (!name || !code) return alert("Thiếu thông tin!");
 
-function saveAll(){
-  localStorage.setItem("scripts",JSON.stringify(scripts));
+  let s = data.scripts.find(x => x.name === name);
+  if (s) s.code = code;
+  else data.scripts.push({name, code});
+
+  save();
+  alert("Đã lưu script!");
+  showScripts();
 }
 
-function render(list=scripts){
-  const user = JSON.parse(localStorage.getItem("user"));
-  scriptsDiv.innerHTML="";
-  list.forEach(s=>{
-    const saved = getSaved().includes(s.id);
-    scriptsDiv.innerHTML+=`
-    <div class="card" data-id="${s.id}">
-      <h3>${saved?"📃 ":""}${s.title}</h3>
-      <textarea readonly>${s.code}</textarea>
-      <div class="actions">
-        <button onclick="copy(this)">📋</button>
-        <button class="${saved?"saved":""}" onclick="saveScript(this)">📃</button>
-        ${user.rank==="OWNER"?`<button onclick="del(this)">🗑</button>`:""}
-      </div>
-    </div>`;
-  });
+function showScripts() {
+  let key = searchScript.value.toLowerCase();
+  scriptList.innerHTML = "";
+
+  data.scripts
+    .filter(s => s.name.toLowerCase().includes(key))
+    .forEach(s => {
+      let div = document.createElement("div");
+      div.className = "scriptBox";
+      div.innerHTML = `
+        <b>${s.name}</b><br><br>
+        <button onclick="downloadScript('${s.name}')">📃 Lưu Script</button>
+      `;
+      scriptList.appendChild(div);
+    });
 }
 
-// ====== ACTIONS ======
-function addScript(){
-  const user = JSON.parse(localStorage.getItem("user"));
-  if(!["OWNER","ADMIN"].includes(user.rank))return;
-  scripts.unshift({
-    id:Date.now(),
-    title:title.value,
-    code:code.value
-  });
-  saveAll();
-  render();
+// ===== DOWNLOAD =====
+function downloadScript(name) {
+  let s = data.scripts.find(x => x.name === name);
+  let blob = new Blob([s.code], {type:"text/plain"});
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name + ".txt";
+  a.click();
 }
 
-function del(btn){
-  const id=btn.closest(".card").dataset.id;
-  scripts=scripts.filter(s=>s.id!=id);
-  saveAll();
-  render();
+// ===== NOTIFY =====
+function notifyAll() {
+  alert("📢 Script vừa được UPDATE!");
 }
 
-function copy(btn){
-  const t=btn.closest(".card").querySelector("textarea");
-  t.select();document.execCommand("copy");
-}
-
-function getSaved(){
-  const u=JSON.parse(localStorage.getItem("user")).name;
-  return JSON.parse(localStorage.getItem("saved_"+u))||[];
-}
-
-function saveScript(btn){
-  const u=JSON.parse(localStorage.getItem("user")).name;
-  const id=btn.closest(".card").dataset.id;
-  let s=getSaved();
-  s=s.includes(id)?s.filter(x=>x!=id):[...s,id];
-  localStorage.setItem("saved_"+u,JSON.stringify(s));
-  render();
-}
-
-function showSaved(){
-  render(scripts.filter(s=>getSaved().includes(s.id)));
-}
-
-function showAll(){render();}
-
-function searchScript(){
-  const v=search.value.toLowerCase();
-  render(scripts.filter(s=>s.title.toLowerCase().includes(v)));
-}
-
-// START
-init();
+save();
 </script>
 
 </body>
